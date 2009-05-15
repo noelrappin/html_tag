@@ -1,0 +1,38 @@
+HtmlTag
+=======
+
+Usage looks something like this:
+
+  def object_to_vertical_rows(obj, *rows)
+    rows.map do |method, caption|
+      Html.tr do |tr|
+        caption = method.to_s.humanize unless caption
+        tr << Html.td("#{caption.capitalize}:", :class => "caption")
+        tr << Html.td(obj.send(method))
+      end
+    end
+  end
+
+Html is a class with a tag name, a content array, and an options hash. There's a class level method_missing function that just creates a new instance with method name, so Html.tr prepares a <tr> tag pair. The content of the tag can be specified as the second argument, or built up in the block. The block takes the tag being built as its argument -- giving that block variable the same name as the tag is a trick to make the block more readable. Any options passed to the constructor are treated as attributes.
+
+Inside the block, content can be added to the tag using the << operator, which just concatenates the new content to the existing content, eliminating the need for ugly join code in the block. You can also assign content to the content attribute directly. Inside the block, you can also assign attributes (tr.id = "fred") -- it's another method_missing deal, where any unknown method is treated as an attribute of the resulting HTML output.
+
+Here's what I like about this setup:
+
+It's meeting my needs -- I can easily convert from my ERb to the Html class. It matches how I think about HTML being constructed
+
+The code is, to my eyes at least, significantly easier to read and follow then the equivalent code written with content_tag.
+
+It's lightweight -- I don't have to convert everything to it, I can use it where appropriate and ignore it otherwise.
+
+
+Here's what I don't like about it:
+
+It's kind of idiosyncratic, and I'm not sure it's enough of an advantage over existing structures to justify the added complexity of a new tag generator.
+
+I haven't done a speed check, but it's probably not all that fast. I suspect it's a bit slower than content_tag.
+
+Having to specify the tag name again as the block argument is a little goofy, although I thought it was less goofy than the instance_eval kind of magic needed to reduce it completely. On the plus side, it does have a nice explicitness to it.
+
+
+Copyright (c) 2009 [name of plugin creator], released under the MIT license
